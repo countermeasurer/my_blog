@@ -2,6 +2,8 @@ from django.db import models
 from django.core.validators import FileExtensionValidator
 from django.contrib.auth import get_user_model
 from mptt.models import MPTTModel, TreeForeignKey
+from django.urls import reverse
+from modules.services.utils import unique_slugify
 
 User = get_user_model()
 
@@ -46,6 +48,16 @@ class Article(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        return reverse('articles_detail', kwargs={'slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        """
+        Сохранение полей модели при их отсутствии заполнения
+        """
+        if not self.slug:
+            self.slug = unique_slugify(self, self.title)
+        super().save(*args, **kwargs)
 
 class Category(MPTTModel):
     """
