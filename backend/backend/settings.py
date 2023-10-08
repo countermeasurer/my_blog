@@ -38,7 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'modules.blog.apps.BlogConfig',
+    'modules.system.apps.SystemConfig',
+    'mptt',
     'modules.services',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -49,6 +52,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
+
+INTERNAL_IPS = [
+    '127.0.0.1'
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -119,6 +127,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = (BASE_DIR / 'static')
+
+STATICFILES_DIRS = [BASE_DIR / 'templates/src']
 
 MEDIA_ROOT = (BASE_DIR / 'media')
 MEDIA_URL = '/media/'
