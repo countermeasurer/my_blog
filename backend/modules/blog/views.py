@@ -56,10 +56,10 @@ def articles_list(request, page):
     return render(request, 'blog/articles_func_list.html', context)
 
 
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView
 
 from .models import Article
-from .forms import ArticleCreateForm
+from .forms import ArticleCreateForm, ArticleUpdateForm
 
 class ArticleCreateView(CreateView):
     """
@@ -78,4 +78,25 @@ class ArticleCreateView(CreateView):
         form.instance.author = self.request.user
         form.save()
         return super().form_valid(form)
+
+
+class ArticleUpdateView(UpdateView):
+    """
+    Представление: обновления материала на сайте
+    """
+    model = Article
+    template_name = 'blog/articles_update.html'
+    context_object_name = 'article'
+    form_class = ArticleUpdateForm
+
+    def get_context_data(self, *, objects_list=None ,**kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = f'Обновление статьи:{ self.object.title}'
+        return context
+
+    def form_valid(self, form):
+        #form.instance.updater = self.request.user
+        form.save()
+        return super().form_valid(form)
+
 
