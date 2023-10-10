@@ -54,3 +54,28 @@ def articles_list(request, page):
     page_object = paginator.get_page(page_number)
     context = {'page_obj': page_object}
     return render(request, 'blog/articles_func_list.html', context)
+
+
+from django.views.generic import CreateView
+
+from .models import Article
+from .forms import ArticleCreateForm
+
+class ArticleCreateView(CreateView):
+    """
+    Представление: создание материалов на сайте
+    """
+    model = Article
+    template_name = 'blog/articles_create.html'
+    form_class = ArticleCreateForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Добавление статей на сайт'
+        return context
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.save()
+        return super().form_valid(form)
+
