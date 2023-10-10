@@ -39,6 +39,6 @@ class ArticleUpdateForm(ArticleCreateForm):
         super().__init__(*args, **kwargs)
 
         self.fields['fixed'].widget.attr.update({
-            'class':'form-check-input'
+            'class': 'form-check-input'
         })
 
