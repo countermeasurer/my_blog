@@ -22,3 +22,23 @@ class ArticleCreateForm(forms.ModelForm):
                     'class': 'form-control',
                     'autocomplete': 'off'
                 })
+
+
+class ArticleUpdateForm(ArticleCreateForm):
+    """
+    Форма обновления статьи на сайте
+    """
+    class Meta:
+        model = Article
+        fields = ArticleCreateForm.Meta.fields = ('updater', 'fixed')
+
+    def __init__(self, *args, **kwargs):
+        """
+        Обновление стилей формы под Bootstrap
+        """
+        super().__init__(*args, **kwargs)
+
+        self.fields['fixed'].widget.attr.update({
+            'class':'form-check-input'
+        })
+
