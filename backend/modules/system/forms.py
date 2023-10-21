@@ -70,7 +70,7 @@ class UserRegisterForm(UserCreationForm):
         Проверка emial на уникальность
         """
 
-        email = self.cleaned_data.get('emial')
+        email = self.cleaned_data.get('email')
         username = self.cleaned_data.get('username')
         if email and User.objects.filter(email=email).exclude(username=username).exists():
             raise forms.ValidationError('Такой email уже используется в системме')
@@ -83,8 +83,8 @@ class UserRegisterForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields['username'].widget.attrs.update({'placeholder': 'Придумайте свой логин'})
-            self.fields['emial'].widget.attrs.update({'placeholder': 'Введите свой emial'})
-            self.fields['fisrt_name'].widget.attrs.update({'placeholder': 'Введите ваше имя'})
+            self.fields['email'].widget.attrs.update({'placeholder': 'Введите свой email'})
+            self.fields['first_name'].widget.attrs.update({'placeholder': 'Введите ваше имя'})
             self.fields['last_name'].widget.attrs.update({'placeholder': 'Введите вашу фамилию'})
             self.fields['password1'].widget.attrs.update({'placeholder': 'Придумайте свой пароль'})
             self.fields['password2'].widget.attrs.update({'placeholder': 'Введите придуманный вами пароль'})
