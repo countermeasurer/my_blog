@@ -30,7 +30,7 @@ class ArticleUpdateForm(ArticleCreateForm):
     """
     class Meta:
         model = Article
-        fields = ArticleCreateForm.Meta.fields = ('updater', 'fixed')
+        fields = ArticleCreateForm.Meta.fields + ('updater', 'fixed')
 
     def __init__(self, *args, **kwargs):
         """
@@ -38,7 +38,7 @@ class ArticleUpdateForm(ArticleCreateForm):
         """
         super().__init__(*args, **kwargs)
 
-        self.fields['fixed'].widget.attr.update({
+        self.fields['fixed'].widget.attrs.update({
             'class': 'form-check-input'
         })
 
