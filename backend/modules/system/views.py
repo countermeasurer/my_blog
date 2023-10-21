@@ -2,10 +2,10 @@ from django.views.generic import DetailView, UpdateView, CreateView
 from django.db import transaction
 from django.urls import reverse_lazy
 from django.contrib.messages.views import SuccessMessageMixin
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
 
 from .models import Profile
-from .forms import UserUpdateForm, ProfileUpdateForm, UserRegisterForm, UserLoginForm
+from .forms import UserUpdateForm, ProfileUpdateForm, UserRegisterForm, UserLoginForm, UserPasswordChangeForm
 
 
 class ProfileDetailView(DetailView):
@@ -65,7 +65,7 @@ class UserRegisterView(SuccessMessageMixin, CreateView):
     """
 
     form_class = UserRegisterForm
-    success_url = reverse_lazy
+    success_url = reverse_lazy('home')
     template_name = 'system/user_register.html'
     success_message = 'Вы успешно зарегистрировались. Можете авторизоваться на сайте!'
 
@@ -75,18 +75,18 @@ class UserRegisterView(SuccessMessageMixin, CreateView):
         return context
 
 
-class UserLoginView(LoginView):
+class UserLoginView(SuccessMessageMixin, LoginView):
     """
-    Автоирзация на сайте
+    Авторизация на сайте
     """
     form_class = UserLoginForm
     template_name = 'system/user_login.html'
     next_page = 'home'
-    success_url = 'Добро пожаловать в систему!'
+    success_message = 'Добро пожаловать на сайт!'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Авторизация в системе'
+        context['title'] = 'Авторизация на сайте'
         return context
 
 
@@ -95,3 +95,24 @@ class UserLogoutView(LogoutView):
     Выход из системы
     """
     next_page = 'home'
+
+
+class UserPasswordChangeView(PasswordChangeView):
+    """
+    Изменение пароля пользователя
+    """
+    form_class = UserPasswordChangeForm
+    template_name = 'system/user_password_change.html'
+    success_url = 'Пароль успешно изменен!'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Изменение пароля в системе'
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('profile_detail', kwargs={'slug': self.request.user.profile.slug})
+
+
+
+
