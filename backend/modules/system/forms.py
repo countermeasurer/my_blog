@@ -1,6 +1,6 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 from .models import Profile
 
@@ -40,7 +40,6 @@ class ProfileUpdateForm(forms.ModelForm):
     """
     Форма обновления данных профиля пользователя
     """
-
     class Meta:
         model = Profile
         fields = ('slug', 'birth_date', 'bio', 'avatar')
@@ -62,18 +61,17 @@ class UserRegisterForm(UserCreationForm):
     Переопределенная форма регистрации пользователей
     """
 
-    class Meta(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
         fields = UserCreationForm.Meta.fields + ('email', 'first_name', 'last_name')
 
     def clean_email(self):
         """
-        Проверка emial на уникальность
+        Проверка email на уникальность
         """
-
         email = self.cleaned_data.get('email')
         username = self.cleaned_data.get('username')
         if email and User.objects.filter(email=email).exclude(username=username).exists():
-            raise forms.ValidationError('Такой email уже используется в системме')
+            raise forms.ValidationError('Такой email уже используется в системе')
         return email
 
     def __init__(self, *args, **kwargs):
@@ -82,16 +80,13 @@ class UserRegisterForm(UserCreationForm):
         """
         super().__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields['username'].widget.attrs.update({'placeholder': 'Придумайте свой логин'})
-            self.fields['email'].widget.attrs.update({'placeholder': 'Введите свой email'})
-            self.fields['first_name'].widget.attrs.update({'placeholder': 'Введите ваше имя'})
-            self.fields['last_name'].widget.attrs.update({'placeholder': 'Введите вашу фамилию'})
-            self.fields['password1'].widget.attrs.update({'placeholder': 'Придумайте свой пароль'})
-            self.fields['password2'].widget.attrs.update({'placeholder': 'Введите придуманный вами пароль'})
-            self.fields[field].widget.attrs.update({'class': 'form-control', 'autocomplete': 'off'})
-
-
-from django.contrib.auth.forms import AuthenticationForm
+            self.fields['username'].widget.attrs.update({"placeholder": 'Придумайте свой логин'})
+            self.fields['email'].widget.attrs.update({"placeholder": 'Введите свой email'})
+            self.fields['first_name'].widget.attrs.update({"placeholder": 'Ваше имя'})
+            self.fields["last_name"].widget.attrs.update({"placeholder": 'Ваша фамилия'})
+            self.fields['password1'].widget.attrs.update({"placeholder": 'Придумайте свой пароль'})
+            self.fields['password2'].widget.attrs.update({"placeholder": 'Повторите придуманный пароль'})
+            self.fields[field].widget.attrs.update({"class": "form-control", "autocomplete": "off"})
 
 
 class UserLoginForm(AuthenticationForm):
@@ -99,18 +94,16 @@ class UserLoginForm(AuthenticationForm):
     Форма авторизации на сайте
     """
 
-def __init__(self, *args, **kwargs):
-    """
-    Обновление стилей формы регистрации
-    """
-    super().__init__(*args, **kwargs)
-    for field in self.fields:
-        self.fields['username'].widget.attrs['placeholder'] = 'Логин пользователя'
-        self.fields['password'].widget.attrs['password'] = 'Пароль пользователя'
-        self.fields['username'].widget.attrs['placeholder'] = 'Логин'
-        self.fields[field].widget.attrs.update({
-            'class': 'form-control',
-            'autocomplete': 'off'
-        })
-
-
+    def __init__(self, *args, **kwargs):
+        """
+        Обновление стилей формы регистрации
+        """
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields['username'].widget.attrs['placeholder'] = 'Логин пользователя'
+            self.fields['password'].widget.attrs['placeholder'] = 'Пароль пользователя'
+            self.fields['username'].label = 'Логин'
+            self.fields[field].widget.attrs.update({
+                'class': 'form-control',
+                'autocomplete': 'off'
+            })
