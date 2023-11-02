@@ -1,8 +1,14 @@
-from django.views.generic import ListView, DeleteView
-from django.urls import reverse_lazy
+from django.http import JsonResponse
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from .models import Article, Category
+from django.urls import reverse_lazy
+from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
+
+from .models import Article, Category, Comment
+from .forms import ArticleCreateForm, ArticleUpdateForm, CommentCreateForm
+from ..services.mixins import AuthorRequiredMixin
 
 
 class ArticleListView(ListView):
@@ -21,10 +27,12 @@ class ArticleDetailView(DeleteView):
     model = Article
     template_name = 'blog/articles_detail.html'
     context_object_name = 'article'
+    queryset = model.objects.detail()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = self.object.title
+        context['form'] = CommentCreateForm
         return context
 
 
@@ -82,6 +90,7 @@ class ArticleUpdateView(AuthorRequiredMixin, SuccessMessageMixin, UpdateView):
     form_class = ArticleUpdateForm
     login_url = 'home'
     success_message = 'Материал был успешно обновлен'
+
     def get_context_data(self, *, objects_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = f'Обновление статьи:{self.object.title}'
@@ -109,6 +118,42 @@ class ArticleDeleteView(AuthorRequiredMixin, DeleteView):
         return context
 
 
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentCreateForm
+
+    def is_ajax(self):
+        return self.request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+    def form_invalid(self, form):
+        if self.is_ajax():
+            return JsonResponse({'error': form.errors}, status=400)
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        comment = form.save(commit=False)
+        comment.article_id = self.kwargs.get('pk')
+        comment.author = self.request.user
+        comment.parent_id = form.cleaned_data.get('parent')
+        comment.save()
+
+        if self.is_ajax():
+            return JsonResponse({
+                'is_child': comment.is_child_node(),
+                'id': comment.id,
+                'author': comment.author.username,
+                'parent_id': comment.parent_id,
+                'time_create': comment.time_create.strftime('%Y-%b-%d %H:%M:%S'),
+                'avatar': comment.author.profile.avatar.url,
+                'content': comment.content,
+                'get_absolute_url': comment.author.profile.get_absolute_url()
+            }, status=200)
+
+        return redirect(comment.article.get_absolute_url())
+
+    def handle_no_permission(self):
+        return JsonResponse({'error': 'Необходимо авторизоваться для добавления комментариев'}, status=400)
+
 
 from django.shortcuts import render
 from django.core.paginator import Paginator
@@ -121,5 +166,3 @@ def articles_list(request, page):
     page_object = paginator.get_page(page_number)
     context = {'page_obj': page_object}
     return render(request, 'blog/articles_func_list.html', context)
-
-

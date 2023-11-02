@@ -28,12 +28,28 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+# Email settings
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = '587'
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = 'countermeasurerrr@gmail.com'
+EMAIL_HOST_PASSWORD = 'jiyogoazpsqiahaa'
+
+EMAIL_SERVER = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_ADMIN = ['countermeasurerrr@gmail.com']
+
 # Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.sites',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
@@ -43,6 +59,8 @@ INSTALLED_APPS = [
     'modules.services',
     'debug_toolbar',
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
