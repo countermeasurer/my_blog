@@ -59,6 +59,29 @@ from .models import Article
 from .forms import ArticleCreateForm, ArticleUpdateForm
 from ..services.mixins import AuthorRequiredMixin
 
+from django.views.generic import ListView
+from taggit.models import Tag
+
+from .models import Article
+
+
+class ArticleByTagListView(ListView):
+    model = Article
+    template_name = 'blog/articles_list.html'
+    context_object_name = 'articles'
+    paginate_by = 10
+    tag = None
+
+    def get_queryset(self):
+        self.tag = Tag.objects.get(slug=self.kwargs['tag'])
+        queryset = Article.objects.all().filter(tags__slug=self.tag.slug)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = f'Статьи по тегу: {self.tag.name}'
+        return context
+
 
 class ArticleCreateView(LoginRequiredMixin, CreateView):
     """

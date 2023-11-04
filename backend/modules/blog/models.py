@@ -5,6 +5,9 @@ from mptt.models import MPTTModel, TreeForeignKey
 from django.urls import reverse
 from modules.services.utils import unique_slugify
 
+from django.db import models
+from taggit.managers import TaggableManager
+
 User = get_user_model()
 
 
@@ -31,7 +34,7 @@ class Article(models.Model):
             """
             return self.get_queryset() \
                 .select_related('author', 'category') \
-                .prefetch_related('comments', 'comments__author', 'comments__author__profile') \
+                .prefetch_related('comments', 'comments__author', 'comments__author__profile', 'tags') \
                 .filter(status='published')
 
     STATUS_OPTIONS = (
@@ -61,7 +64,7 @@ class Article(models.Model):
     category = TreeForeignKey('Category', on_delete=models.PROTECT, related_name='articles', verbose_name='Категория')
 
     objects = ArticleManager()
-
+    tags = TaggableManager()
     class Meta:
         db_table = 'app_articles'
         ordering = ['-fixed', '-time_create']
@@ -158,3 +161,4 @@ class Comment(MPTTModel):
 
     def __str__(self):
         return f'{self.author}:{self.content}'
+

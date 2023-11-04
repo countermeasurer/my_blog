@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'modules.services',
     'debug_toolbar',
     'taggit',
+    'captcha',
 ]
 
 SITE_ID = 1
@@ -156,3 +157,6 @@ MEDIA_URL = '/media/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+RECAPTCHA_PUBLIC_KEY = '6LegVPUoAAAAAKaBumOioB_NX0H-OYEBB_ErO_6g'
+RECAPTCHA_PRIVATE_KEY = '6LegVPUoAAAAAEv5LlvRqsJi_YOJGlFnsai2czMr'
