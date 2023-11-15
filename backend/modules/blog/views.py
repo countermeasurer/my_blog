@@ -5,6 +5,13 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
+from django.views.generic import CreateView, UpdateView
+
+from .models import Article
+from django.views.generic import ListView
+from taggit.models import Tag
+import random
+from django.db.models import Count
 
 from .models import Article, Category, Comment
 from .forms import ArticleCreateForm, ArticleUpdateForm, CommentCreateForm
@@ -29,10 +36,19 @@ class ArticleDetailView(DeleteView):
     context_object_name = 'article'
     queryset = model.objects.detail()
 
+    def get_similar_articles(self, obj):
+        article_tags_ids = obj.tags.values_list('id', flat=True)
+        similar_articles = Article.objects.filter(tags__in=article_tags_ids).exclude(id=obj.id)
+        similar_articles = similar_articles.annotate(related_tags=Count('tags')).order_by('-related_tags')
+        similar_articles_list = list(similar_articles.all())
+        random.shuffle(similar_articles_list)
+        return similar_articles_list[:6]
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = self.object.title
         context['form'] = CommentCreateForm
+        context['similar_articles'] = self.get_similar_articles(self.object)
         return context
 
 
@@ -51,18 +67,6 @@ class ArticleByCategoryListView(ListView):
         context = super().get_context_data(**kwargs)
         context['title'] = f'Статья из категории: {self.category.title}'
         return context
-
-
-from django.views.generic import CreateView, UpdateView
-
-from .models import Article
-from .forms import ArticleCreateForm, ArticleUpdateForm
-from ..services.mixins import AuthorRequiredMixin
-
-from django.views.generic import ListView
-from taggit.models import Tag
-
-from .models import Article
 
 
 class ArticleByTagListView(ListView):
@@ -176,10 +180,6 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
     def handle_no_permission(self):
         return JsonResponse({'error': 'Необходимо авторизоваться для добавления комментариев'}, status=400)
-
-
-from django.shortcuts import render
-from django.core.paginator import Paginator
 
 
 def articles_list(request, page):
