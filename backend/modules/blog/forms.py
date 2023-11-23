@@ -10,7 +10,7 @@ class ArticleCreateForm(forms.ModelForm):
 
     class Meta:
         model = Article
-        fields = ('title', 'slug', 'category', 'short_description', 'full_description', 'thumbnail', 'status')
+        fields = ('title', 'slug', 'category', 'short_description', 'full_description', 'thumbnail', 'status', 'tags')
 
         def __init__(self, *args, **kwargs):
             """
@@ -23,6 +23,10 @@ class ArticleCreateForm(forms.ModelForm):
                     'autocomplete': 'off'
                 })
 
+            self.fields['short_description'].widget.attrs.update({'class': 'form-control django_ckeditor_5'})
+            self.fields['full_description'].widget.attrs.update({'class': 'form-control django_ckeditor_5'})
+            self.fields['short_description'].required = False
+            self.fields['full_description'].required = False
 
 class ArticleUpdateForm(ArticleCreateForm):
     """
@@ -39,9 +43,11 @@ class ArticleUpdateForm(ArticleCreateForm):
         """
         super().__init__(*args, **kwargs)
 
-        self.fields['fixed'].widget.attrs.update({
-            'class': 'form-check-input'
-        })
+        self.fields['fixed'].widget.attrs.update({'class': 'form-check-input'})
+        self.fields['short_description'].widget.attrs.update({'class': 'form-control django_ckeditor_5'})
+        self.fields['full_description'].widget.attrs.update({'class': 'form-control django_ckeditor_5'})
+        self.fields['short_description'].required = False
+        self.fields['full_description'].required = False
 
 
 class CommentCreateForm(forms.ModelForm):
