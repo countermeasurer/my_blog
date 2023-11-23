@@ -3,7 +3,7 @@ from django.core.validators import FileExtensionValidator
 from django.contrib.auth import get_user_model
 from mptt.models import MPTTModel, TreeForeignKey
 from django.urls import reverse
-from modules.services.utils import unique_slugify
+from ..services.utils import unique_slugify
 
 from django.db import models
 from taggit.managers import TaggableManager
@@ -27,7 +27,7 @@ class Article(models.Model):
             Список статей (SQL запрос с фильтрацией для страницы списка статей)
 
             """
-            return self.get_queryset().select_related('author', 'category').filter(status='published')
+            return self.get_queryset().select_related('author', 'category').prefetch_related('ratings').filter(status='published')
 
         def detail(self):
             """
@@ -35,7 +35,7 @@ class Article(models.Model):
             """
             return self.get_queryset() \
                 .select_related('author', 'category') \
-                .prefetch_related('comments', 'comments__author', 'comments__author__profile', 'tags') \
+                .prefetch_related('comments', 'comments__author', 'comments__author__profile', 'tags', 'ratings') \
                 .filter(status='published')
 
     STATUS_OPTIONS = (
@@ -79,6 +79,9 @@ class Article(models.Model):
 
     def get_absolute_url(self):
         return reverse('articles_detail', kwargs={'slug': self.slug})
+
+    def get_sum_rating(self):
+        return sum([rating.value for rating in self.ratings.all()])
 
     def save(self, *args, **kwargs):
         """
