@@ -163,3 +163,25 @@ class Comment(MPTTModel):
 
     def __str__(self):
         return f'{self.author}:{self.content}'
+
+
+class Rating(models.Model):
+    """
+    Модель рейтинга
+    """
+    article = models.ForeignKey(to=Article, verbose_name='Статья', on_delete=models.CASCADE, related_name='ratings')
+    user = models.ForeignKey(to=User, verbose_name='Пользователь', on_delete=models.CASCADE, blank=True, null=True)
+    value = models.IntegerField(verbose_name='Значение', choices=[(1, 'нравится'), (-1, 'Не нравится')])
+    time_create = models.DateTimeField(verbose_name='Время добавления', auto_now_add=True)
+    ip_adress = models.GenericIPAddressField(verbose_name='IP адресс')
+
+    class Meta:
+        unique_together = ('article', 'ip_adress')
+        ordering = ('-time_create', )
+        indexes = [models.Index(fields=['-time_create', 'value'])]
+        verbose_name = 'Рейтинг'
+        verbose_name_plural = 'Рейтинги'
+
+    def __str__(self):
+        return self.article.title
+
