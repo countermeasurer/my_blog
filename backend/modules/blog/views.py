@@ -185,6 +185,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.views.generic import ListView
 
+
 class ArticleSearchResultView(ListView):
     """
     Реализация поиска статей на сайте
@@ -200,12 +201,48 @@ class ArticleSearchResultView(ListView):
         query = self.request.GET.get('do')
         search_vector = SearchVector('full_description', weight='B') + SearchVector('title', weight='A')
         search_query = SearchQuery(query)
-        return (self.model.objects.annotate(rank=SearchRank(search_vector,search_query))).filter(rank__gte=0.3).order_by('-rank')
+        return (self.model.objects.annotate(rank=SearchRank(search_vector, search_query))).filter(
+            rank__gte=0.3).order_by('-rank')
 
-    def get_context_data(self,**kwargs):
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = f'Результаты поиска: {self.request.GET.get("do")}'
         return context
+
+
+from django.http import JsonResponse
+from django.views.generic import View
+
+from .models import Rating
+from ..services.utils import get_client_ip
+
+
+class RatingCreateView(View):
+    model = Rating
+
+    def post(self, request, *args, **kwargs):
+        article_id = request.POST.get('article_id')
+        value = int(request.POST.get('value'))
+        ip_adress = get_client_ip(request)
+        user = request.user if request.user.is_authenticated else None
+
+        rating, created = self.model.objects.get_or_create(
+            article_id=article_id,
+            ip_adress=ip_adress,
+            defaults={'vlaue': value, 'user': user},
+        )
+
+        if not created:
+            if rating.value == value:
+                rating.delete()
+                return JsonResponse({'status': 'deleted', 'rating_sum': rating.article.get_sum_rating()})
+            else:
+                rating.value == value
+                rating.user == user
+                rating.save()
+                return JsonResponse({'status': 'updated', 'rating_sum': rating.article.get_sum_rating()})
+            return JsonResponse({'status': 'updated', 'rating_sum': rating.article.get_sum_rating()})
+
 
 def articles_list(request, page):
     articles = Article.objects.all()
