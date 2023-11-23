@@ -7,6 +7,7 @@ from modules.services.utils import unique_slugify
 
 from django.db import models
 from taggit.managers import TaggableManager
+from django_ckeditor_5.fields import CKEditor5Field
 
 User = get_user_model()
 
@@ -44,8 +45,8 @@ class Article(models.Model):
 
     title = models.CharField(verbose_name='Заголовок', max_length=255)
     slug = models.SlugField(verbose_name='URL', max_length=255, blank=True, unique=True)
-    short_description = models.TextField(verbose_name='Краткое описание', max_length=500)
-    full_description = models.TextField(verbose_name='Полное описание')
+    short_description = CKEditor5Field(max_length=500, verbose_name='Краткое описание', config_name='extends')
+    full_description = CKEditor5Field(verbose_name='Полное описание', config_name='extends')
     thumbnail = models.ImageField(
         verbose_name='Превью поста',
         blank=True,
@@ -65,6 +66,7 @@ class Article(models.Model):
 
     objects = ArticleManager()
     tags = TaggableManager()
+
     class Meta:
         db_table = 'app_articles'
         ordering = ['-fixed', '-time_create']
@@ -161,4 +163,3 @@ class Comment(MPTTModel):
 
     def __str__(self):
         return f'{self.author}:{self.content}'
-
