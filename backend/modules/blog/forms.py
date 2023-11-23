@@ -10,23 +10,21 @@ class ArticleCreateForm(forms.ModelForm):
 
     class Meta:
         model = Article
-        fields = ('title', 'slug', 'category', 'short_description', 'full_description', 'thumbnail', 'status', 'tags')
+        fields = ('title', 'slug', 'category', 'short_description', 'full_description', 'thumbnail', 'status')
 
-        def __init__(self, *args, **kwargs):
-            """
-            Обновление стилей формы под Bootstrap
-            """
-            super().__init__(*args, **kwargs)
-            for field in self.fields:
-                self.fields[field].widget.attrs.update({
-                    'class': 'form-control',
-                    'autocomplete': 'off'
-                })
+    def __init__(self, *args, **kwargs):
+        """
+        Обновление стилей формы под Bootstrap
+        """
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control', 'autocomplete': 'off'})
 
-            self.fields['short_description'].widget.attrs.update({'class': 'form-control django_ckeditor_5'})
-            self.fields['full_description'].widget.attrs.update({'class': 'form-control django_ckeditor_5'})
-            self.fields['short_description'].required = False
-            self.fields['full_description'].required = False
+        self.fields['short_description'].widget.attrs.update({'class': 'form-control django_ckeditor_5'})
+        self.fields['full_description'].widget.attrs.update({'class': 'form-control django_ckeditor_5'})
+        self.fields['short_description'].required = False
+        self.fields['full_description'].required = False
+
 
 class ArticleUpdateForm(ArticleCreateForm):
     """
