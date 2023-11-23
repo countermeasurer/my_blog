@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from django.shortcuts import redirect
 from django.contrib.auth import login
 
+
 from .models import Profile
 from .forms import UserUpdateForm, ProfileUpdateForm, UserRegisterForm, UserLoginForm, UserPasswordChangeForm, UserForgotPasswordForm, UserSetNewPasswordForm
 from ..services.mixins import UserIsNotAuthenticated
@@ -95,7 +96,7 @@ class UserRegisterView(UserIsNotAuthenticated, CreateView):
         current_site = Site.objects.get_current().domain
         send_mail(
             'Подтвердите свой электронный адрес',
-            f'Пожалуйста, перейдите по следующей ссылке, чтобы подтвердить свой адрес электронной почты: https://{current_site}{activation_url}',
+            f'Пожалуйста, перейдите по следующей ссылке, чтобы подтвердить свой адрес электронной почты: http://{current_site}{activation_url}',
             'countermeasurerrr@gmail.com',
             [user.email],
             fail_silently=False,
@@ -187,7 +188,7 @@ class UserConfirmEmailView(View):
             user = None
 
         if user is not None and default_token_generator.check_token(user, token):
-            user.is_active()
+            user.is_active = True
             user.save()
             login(request, user)
             return redirect('email_confirmed')
