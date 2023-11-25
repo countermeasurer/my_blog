@@ -8,15 +8,14 @@ class LatestArticlesFeed(Feed):
     link = '/feeds/'
     description = 'Новые статьи на моем сайте'
 
-    def items(self ):
+    def items(self):
         return Article.objects.order_by('-time_create')[:5]
 
     def item_title(self, item):
         return item.title
 
     def item_description(self, item):
-        return item.description
+        return item.short_description
 
     def item_link(self, item):
         return reverse('articles_detail', args=[item.slug])
-
