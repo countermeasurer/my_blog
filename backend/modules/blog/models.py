@@ -3,7 +3,7 @@ from django.core.validators import FileExtensionValidator
 from django.contrib.auth import get_user_model
 from mptt.models import MPTTModel, TreeForeignKey
 from django.urls import reverse
-from ..services.utils import unique_slugify
+from ..services.utils import unique_slugify, image_compress
 
 from django.db import models
 from taggit.managers import TaggableManager
@@ -28,7 +28,6 @@ class Article(models.Model):
 
             """
             return self.get_queryset().select_related('author', 'category').prefetch_related('ratings').filter(status='published')
-
 
         def detail(self):
             """
@@ -84,6 +83,10 @@ class Article(models.Model):
     def get_sum_rating(self):
         return sum([rating.value for rating in self.ratings.all()])
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__thumbnail = self.thumbnail if self.pk else None
+
     def save(self, *args, **kwargs):
         """
         Сохранение полей модели при их отсутствии заполнения
@@ -91,6 +94,9 @@ class Article(models.Model):
         if not self.slug:
             self.slug = unique_slugify(self, self.title)
         super().save(*args, **kwargs)
+
+        if self.__thumbnail != self.thumbnail and self.thumbnail:
+            image_compress(self.thumbnail.path, width=500, height=500)
 
 
 class Category(MPTTModel):
