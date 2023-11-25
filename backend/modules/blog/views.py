@@ -229,7 +229,7 @@ class RatingCreateView(View):
         rating, created = self.model.objects.get_or_create(
             article_id=article_id,
             ip_adress=ip_adress,
-            defaults={'vlaue': value, 'user': user},
+            defaults={'value': value, 'user': user}
         )
 
         if not created:
@@ -240,8 +240,8 @@ class RatingCreateView(View):
                 rating.value == value
                 rating.user == user
                 rating.save()
-                return JsonResponse({'status': 'updated', 'rating_sum': rating.article.get_sum_rating()})
-            return JsonResponse({'status': 'updated', 'rating_sum': rating.article.get_sum_rating()})
+                return JsonResponse({'status': 'deleted', 'rating_sum': rating.article.get_sum_rating()})
+        return JsonResponse({'status': 'deleted', 'rating_sum': rating.article.get_sum_rating()})
 
 
 def articles_list(request, page):
