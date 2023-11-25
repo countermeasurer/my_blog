@@ -283,3 +283,38 @@ def tr_handler403(request, exception):
         'title': 'Ошибка доступа: 403',
         'error_message': 'Доступ к этой странице ограничен',
     })
+
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.http import JsonResponse
+
+@method_decorator(login_required, name='dispatch')
+class ProfileFollowingCreateView(View):
+    """
+    Создание подписки для пользователей
+    """
+    model = Profile
+
+    def is_ajax(self):
+        return self.request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+    def post(self, request, slug):
+        user = self.model.objects.get(slug=slug)
+        profile = request.user.profile
+        if profile in user.followers.all():
+            user.followers.remove(profile)
+            message = f'Подписаться на {user}'
+            status = False
+        else:
+            user.followers.add(profile)
+            message = f'Отписаться от {user}'
+            status = True
+        data = {
+            'username': profile.user.username,
+            'get_absolute_url': profile.get_absolute_url(),
+            'slug': profile.slug,
+            'avatar': profile.get_avatar,
+            'message': message,
+            'status': status,
+        }
+        return JsonResponse
