@@ -37,6 +37,12 @@ class Profile(models.Model):
         verbose_name = 'Профиль'
         verbose_name_plural = 'Профили'
 
+    def is_online(self):
+        last_seen = cache.get(f'last-seen-{self.user.id}')
+        if last_seen is not None and timezone.now() < last_seen + timezone.timedelta(seconds=300):
+            return True
+        return False
+
     def save(self, *args, **kwargs):
         """
         Сохранение полей модели при их отсутствии заполнения
@@ -57,11 +63,7 @@ class Profile(models.Model):
         """
         return reverse('profile_detail', kwargs={'slug': self.slug})
 
-    def is_online(self):
-        last_seen = cache.get(f'last-seen-{self.user.id}')
-        if last_seen is not None and timezone.now() < last_seen + timezone.timedelta(seconds=300):
-            return True
-        return False
+
 
 
 @receiver(post_save, sender=User)
