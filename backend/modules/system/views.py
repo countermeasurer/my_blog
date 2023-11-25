@@ -276,6 +276,9 @@ def tr_handler500(request):
 
 
 def tr_handler403(request):
+    """
+    Обработка ошибки 403
+    """
     return render(request=request, template_name='system/errors/error_page.html', status=403, context={
         'title': 'Ошибка доступа: 403',
         'error_message': 'Доступ к этой странице ограничен',
