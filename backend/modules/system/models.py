@@ -9,7 +9,6 @@ from datetime import date, timedelta
 from django.utils import timezone
 from django.core.cache import cache
 
-
 from ..services.utils import unique_slugify
 
 User = get_user_model()
@@ -18,6 +17,8 @@ User = get_user_model()
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     slug = models.SlugField(verbose_name='URL', max_length=255, blank=True, unique=True)
+    following = models.ManyToManyField('self', verbose_name='Подписки', related_name='followers', symmetrical=False,
+                                       blank=True)
     avatar = models.ImageField(
         verbose_name='Аватар',
         upload_to='images/avatars/%Y/%m/%d/',
@@ -25,14 +26,14 @@ class Profile(models.Model):
         blank=True,
         validators=[FileExtensionValidator(allowed_extensions=('png', 'jpg', 'jpeg'))]
     )
-    bio = models.TextField(max_length=500, blank=True,verbose_name='Информация о себе')
+    bio = models.TextField(max_length=500, blank=True, verbose_name='Информация о себе')
     birth_date = models.DateField(null=True, blank=True, verbose_name='Дата рождения')
 
     class Meta:
         """
         Сортировка, название таблицы в бд
         """
-        db_table ='app_profiles'
+        db_table = 'app_profiles'
         ordering = ('user',)
         verbose_name = 'Профиль'
         verbose_name_plural = 'Профили'
@@ -64,12 +65,11 @@ class Profile(models.Model):
         return reverse('profile_detail', kwargs={'slug': self.slug})
 
 
-
-
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
+
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
@@ -95,4 +95,3 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f'Вам письмо от {self.email}'
-
