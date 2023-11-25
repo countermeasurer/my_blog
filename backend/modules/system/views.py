@@ -2,7 +2,8 @@ from django.views.generic import DetailView, UpdateView, CreateView, View, Templ
 from django.db import transaction
 from django.urls import reverse_lazy
 from django.contrib.messages.views import SuccessMessageMixin
-from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetConfirmView, LogoutView
+from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetConfirmView, \
+    LogoutView
 from django.contrib.sites.models import Site
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -12,9 +13,9 @@ from django.core.mail import send_mail
 from django.shortcuts import redirect
 from django.contrib.auth import login
 
-
 from .models import Profile
-from .forms import UserUpdateForm, ProfileUpdateForm, UserRegisterForm, UserLoginForm, UserPasswordChangeForm, UserForgotPasswordForm, UserSetNewPasswordForm
+from .forms import UserUpdateForm, ProfileUpdateForm, UserRegisterForm, UserLoginForm, UserPasswordChangeForm, \
+    UserForgotPasswordForm, UserSetNewPasswordForm
 from ..services.mixins import UserIsNotAuthenticated
 
 User = get_user_model()
@@ -105,7 +106,6 @@ class UserRegisterView(UserIsNotAuthenticated, CreateView):
         return redirect('email_confirmation_sent')
 
 
-
 class UserLoginView(SuccessMessageMixin, LoginView):
     """
     Авторизация на сайте
@@ -176,6 +176,7 @@ class UserPasswordResetConfirmView(SuccessMessageMixin, PasswordResetConfirmView
         context['title'] = 'Установить новый пароль'
         return context
 
+
 # Подтверждение mail
 
 
@@ -223,7 +224,6 @@ class EmailConfirmationFailedView(TemplateView):
         return context
 
 
-
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
@@ -247,12 +247,36 @@ class FeedbackCreateView(SuccessMessageMixin, CreateView):
             feedback.ip_address = get_client_ip(self.request)
             if self.request.user.is_authenticated:
                 feedback.user = self.request.user
-            send_contact_email_message(feedback.subject, feedback.email, feedback.content, feedback.ip_address, feedback.user_id)
+            send_contact_email_message(feedback.subject, feedback.email, feedback.content, feedback.ip_address,
+                                       feedback.user_id)
         return super().form_valid(form)
 
 
+from django.shortcuts import render
 
 
+def tr_handler404(request, exception):
+    """
+    Обработка ошибки 404
+    """
+    return render(request=request, template_name='system/errors/error_page.html', status=404, context={
+        'title': 'Страница не найдена: 404',
+        'error_message': 'к сожалению такая страница была не найдена, или переменная',
+    })
 
 
+def tr_handler500(request):
+    """
+    Обработка ошибки 500
+    """
+    return render(request=request, template_name='system/errors/error_page.html', status=500, context={
+        'title': 'Ошибка сервера: 500',
+        'error_message': 'Внутренняя ошибка сайта, вернитесь на главную страницу, отчет об ошибке мы направим администрации сайта',
+    })
 
+
+def tr_handler403(request):
+    return render(request=request, template_name='system/errors/error_page.html', status=403, context={
+        'title': 'Ошибка доступа: 403',
+        'error_message': 'Доступ к этой странице ограничен',
+    })
