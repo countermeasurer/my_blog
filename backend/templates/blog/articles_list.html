@@ -1,5 +1,5 @@
 {% extends 'main.html' %}
-{% load 'static' %}
+{% load static %}
 
 {% block content %}
     {% for article in articles %}
@@ -18,8 +18,8 @@
                   </div>
                 </div>
                 <div class="rating-buttons">
-                    <button class="btn btn-sm btn-primary" data-artile="{{ article.id }}" data-value="1">like</button>
-                    <button class="btn btn-sm btn-secondary" data-article="{{ article.id}}"data-value="-1">dislike</button>
+                    <button class="btn btn-sm btn-primary" data-article="{{ article.id }}" data-value="1">like</button>
+                    <button class="btn btn-sm btn-secondary" data-article="{{article.id }}" data-value="-1">dislike</button>
                     <button class="btn btn-sm btn-secondary rating-sum">{{ article.get_sum_rating }}</button>
                 </div>
             </div>
@@ -28,5 +28,5 @@
 {% endblock %}
 
 {% block script %}
-<script src="{% static 'custom/js/rating.js' %}"></script>
+<script src="{% static 'custom/js/ratings.js' %}"></script>
 {% endblock %}
