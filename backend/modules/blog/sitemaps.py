@@ -16,8 +16,8 @@ class ArticleSitemap(Sitemap):
     def items(self):
         return Article.objects.all()
 
-    def lastmod(self):
-        return object.time_update
+    def lastmod(self, obj):
+        return obj.time_update
 
 
 class StaticSitemap(Sitemap):
