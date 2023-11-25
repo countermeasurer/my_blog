@@ -8,7 +8,7 @@ from django.urls import reverse
 from datetime import date, timedelta
 
 
-from modules.services.utils import unique_slugify
+from ..services.utils import unique_slugify
 
 User = get_user_model()
 
