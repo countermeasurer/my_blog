@@ -261,7 +261,7 @@ def tr_handler404(request, exception):
     """
     return render(request=request, template_name='system/errors/error_page.html', status=404, context={
         'title': 'Страница не найдена: 404',
-        'error_message': 'к сожалению такая страница была не найдена, или переменная',
+        'error_message': 'К сожалению такая страница была не найдена, или переменная',
     })
 
 
@@ -275,7 +275,7 @@ def tr_handler500(request):
     })
 
 
-def tr_handler403(request):
+def tr_handler403(request, exception):
     """
     Обработка ошибки 403
     """
