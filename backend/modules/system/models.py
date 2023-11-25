@@ -6,6 +6,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
 from datetime import date, timedelta
+from django.utils import timezone
+from django.core.cache import cache
 
 
 from ..services.utils import unique_slugify
@@ -54,6 +56,12 @@ class Profile(models.Model):
         Ссылка на профиль
         """
         return reverse('profile_detail', kwargs={'slug': self.slug})
+
+    def is_online(self):
+        last_seen = cache.get(f'last-seen-{self.user.id}')
+        if last_seen is not None and timezone.now() < last_seen + timezone.timedelta(seconds=300):
+            return True
+        return False
 
 
 @receiver(post_save, sender=User)
