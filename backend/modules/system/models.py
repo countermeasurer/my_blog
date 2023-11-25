@@ -38,6 +38,12 @@ class Profile(models.Model):
         verbose_name = 'Профиль'
         verbose_name_plural = 'Профили'
 
+    @property
+    def get_avatar(self):
+        if self.avatar:
+            return self.avatar.url
+        return f'https://ui-avatars.com/api/?size=150&background=random&name={self.slug}'
+
     def is_online(self):
         last_seen = cache.get(f'last-seen-{self.user.id}')
         if last_seen is not None and timezone.now() < last_seen + timezone.timedelta(seconds=300):
