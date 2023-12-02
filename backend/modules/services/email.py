@@ -27,7 +27,7 @@ def send_contact_email_message(subject, email, content, ip, user_id):
     email.send(fail_silently=False)
 
 
-def send_active_email_message(user_id):
+def send_activate_email_message(user_id):
     """
     Функция отправки письма с подтверждением для аккаунта
     """
