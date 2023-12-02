@@ -28,7 +28,7 @@ class ProfileDetailView(DetailView):
     model = Profile
     context_object_name = 'profile'
     template_name = 'system/profile_detail.html'
-    queryset = model.objects.all().select_related('user')
+    queryset = model.objects.all().select_related('user').prefetch_related('followers', 'followers__user', 'following', 'following__user')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -317,4 +317,4 @@ class ProfileFollowingCreateView(View):
             'message': message,
             'status': status,
         }
-        return JsonResponse
+        return JsonResponse(data, status=200)
