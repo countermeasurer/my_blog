@@ -88,7 +88,7 @@ class UserRegisterForm(UserCreationForm):
         Обновление стилей формы регистрации
         """
         super().__init__(*args, **kwargs)
-        for field in self.fields:
+        for field in self.fieldss:
             self.fields['username'].widget.attrs.update({"placeholder": 'Придумайте свой логин'})
             self.fields['email'].widget.attrs.update({"placeholder": 'Введите свой email'})
             self.fields['first_name'].widget.attrs.update({"placeholder": 'Ваше имя'})
