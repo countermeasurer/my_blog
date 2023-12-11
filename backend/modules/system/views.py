@@ -4,12 +4,10 @@ from django.urls import reverse_lazy
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, PasswordResetConfirmView, \
     LogoutView
-from django.contrib.sites.models import Site
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes
-from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_decode
 from django.shortcuts import redirect
 from django.contrib.auth import login
 
@@ -17,6 +15,7 @@ from .models import Profile
 from .forms import UserUpdateForm, ProfileUpdateForm, UserRegisterForm, UserLoginForm, UserPasswordChangeForm, \
     UserForgotPasswordForm, UserSetNewPasswordForm
 from ..services.mixins import UserIsNotAuthenticated
+from ..services.tasks import send_activate_email_message_task, send_contact_email_message_task
 
 User = get_user_model()
 
@@ -90,19 +89,7 @@ class UserRegisterView(UserIsNotAuthenticated, CreateView):
         user = form.save(commit=False)
         user.is_active = False
         user.save()
-        # Функционал для отправки письма и генерации токена
-        token = default_token_generator.make_token(user)
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        activation_url = reverse_lazy('confirm_email', kwargs={'uidb64': uid, 'token': token})
-        current_site = Site.objects.get_current().domain
-        send_mail(
-            'Подтвердите свой электронный адрес',
-            f'Пожалуйста, перейдите по следующей ссылке, чтобы подтвердить свой адрес электронной почты: http://{current_site}{activation_url}',
-            'countermeasurerrr@gmail.com',
-            [user.email],
-            fail_silently=False,
-
-        )
+        send_activate_email_message_task.delay(user.id)
         return redirect('email_confirmation_sent')
 
 
@@ -229,7 +216,6 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from .forms import FeedbackCreateForm
 from .models import Feedback
-from ..services.email import send_contact_email_message
 from ..services.utils import get_client_ip
 
 
@@ -247,7 +233,7 @@ class FeedbackCreateView(SuccessMessageMixin, CreateView):
             feedback.ip_address = get_client_ip(self.request)
             if self.request.user.is_authenticated:
                 feedback.user = self.request.user
-            send_contact_email_message(feedback.subject, feedback.email, feedback.content, feedback.ip_address,
+            send_contact_email_message_task.delay(feedback.subject, feedback.email, feedback.content, feedback.ip_address,
                                        feedback.user_id)
         return super().form_valid(form)
 
