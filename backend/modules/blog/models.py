@@ -27,7 +27,7 @@ class Article(models.Model):
             Список статей (SQL запрос с фильтрацией для страницы списка статей)
 
             """
-            return self.get_queryset().select_related('author', 'category').prefetch_related('ratings').filter(status='published')
+            return self.get_queryset().select_related('author', 'category').prefetch_related('ratings', 'views').filter(status='published')
 
         def detail(self):
             """
@@ -73,6 +73,12 @@ class Article(models.Model):
         indexes = [models.Index(fields=['-fixed', '-time_create', 'status'])]
         verbose_name = 'Статья'
         verbose_name_plural = 'Статьи'
+
+    def get_view_count(self):
+        """
+        Возвращает кол-во просмотров для данной статьи
+        """
+        return self.views.count()
 
     def __str__(self):
         return self.title
