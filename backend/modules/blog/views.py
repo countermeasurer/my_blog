@@ -16,6 +16,7 @@ from django.db.models import Count
 from .models import Article, Category, Comment
 from .forms import ArticleCreateForm, ArticleUpdateForm, CommentCreateForm
 from ..services.mixins import AuthorRequiredMixin
+from .mixins import ViewCountMixin
 
 
 class ArticleListView(ListView):
@@ -30,7 +31,7 @@ class ArticleListView(ListView):
         return context
 
 
-class ArticleDetailView(DeleteView):
+class ArticleDetailView(ViewCountMixin, DeleteView):
     model = Article
     template_name = 'blog/articles_detail.html'
     context_object_name = 'article'
