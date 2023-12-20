@@ -105,7 +105,7 @@ class Article(models.Model):
         Возвращает кол-во просмотров для данной статьи за сегодня
         """
         today = date.today()
-        return self.views.filter(viewed_on__date=today).cont()
+        return self.views.filter(viewed_on__date=today).count()
 
     def save(self, *args, **kwargs):
         """
