@@ -5,7 +5,7 @@ from mptt.models import MPTTModel, TreeForeignKey
 from django.urls import reverse
 from ..services.utils import unique_slugify, image_compress
 
-from django.db import models
+from datetime import date
 from taggit.managers import TaggableManager
 from django_ckeditor_5.fields import CKEditor5Field
 
@@ -92,6 +92,20 @@ class Article(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.__thumbnail = self.thumbnail if self.pk else None
+
+
+    def get_view_count(self):
+        """
+        Возвращает кол-во просмотров для данной статьи
+        """
+        return self.views.count()
+
+    def get_today_view_count(self):
+        """
+        Возвращает кол-во просмотров для данной статьи за сегодня
+        """
+        today = date.today()
+        return self.views.filter(viewed_on__date=today).cont()
 
     def save(self, *args, **kwargs):
         """
