@@ -1,4 +1,6 @@
 {% load mptt_tags blog_tags %}
+{% load blog_tags cache %}
+{% cache 300 sidebar %}
 
 <div class="card">
     <div class="card-body">
@@ -34,5 +36,22 @@
 		</div>
 	</div>
 </div>
+
+<div class="card mb-2">
+    <div class="card-body">
+        <h5 class="card-title">Популярные статьи за 7 дней</h5>
+        <div class="card-text">
+            <ul>
+                {% popular_articles as articles_list %}
+                    {% for article in articles_list %}
+                <li><a href="{{ article.get_abcolute_url }}">{{article.title}}</a>({{ article.get_view_count}}) +({{article.get_today_view_count }})</li>
+                {% empty %}
+                <li>Популярных статей не найдено.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endcache %}
 
 {% show_latest_comments count=5 %}
